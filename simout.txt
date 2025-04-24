@@ -54,19 +54,19 @@ Algorithm SRT
 -- overall number of preemptions: 10
 
 Algorithm RR
--- CPU utilization: 67.935%
--- CPU-bound average wait time: 67.400 ms
--- I/O-bound average wait time: 690.800 ms
--- overall average wait time: 344.467 ms
--- CPU-bound average turnaround time: 1678.120 ms
--- I/O-bound average turnaround time: 943.500 ms
--- overall average turnaround time: 1351.623 ms
--- CPU-bound number of context switches: 63
--- I/O-bound number of context switches: 27
--- overall number of context switches: 90
--- CPU-bound number of preemptions: 38
--- I/O-bound number of preemptions: 7
--- overall number of preemptions: 45
+-- CPU utilization: 72.806%
+-- CPU-bound average wait time: 173.280 ms
+-- I/O-bound average wait time: 240.550 ms
+-- overall average wait time: 203.178 ms
+-- CPU-bound average turnaround time: 1781.120 ms
+-- I/O-bound average turnaround time: 493.650 ms
+-- overall average turnaround time: 1208.912 ms
+-- CPU-bound number of context switches: 45
+-- I/O-bound number of context switches: 29
+-- overall number of context switches: 74
+-- CPU-bound number of preemptions: 20
+-- I/O-bound number of preemptions: 9
+-- overall number of preemptions: 29
 -- CPU-bound percentage of CPU bursts completed within one time slice: 12.000%
 -- I/O-bound percentage of CPU bursts completed within one time slice: 70.000%
 -- overall percentage of CPU bursts completed within one time slice: 37.778%
