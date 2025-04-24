@@ -33,8 +33,7 @@ public:
   int total_cpu_time;
   int start_turnaround; 
   int total_turnaround; 
-  bool pseudoRandomCPUBursts;
-
+  bool RR_ALT;
   /**
    * @brief Function to determine if the process is on a CPU burst
    * 

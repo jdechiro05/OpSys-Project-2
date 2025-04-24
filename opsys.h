@@ -9,6 +9,7 @@
 #include <unordered_set>
 #include <cstring>
 #include "process.h"
+#include <deque>
 
 #define TRUNCATE true 
 #define TRUNC_TIME 10000
@@ -160,7 +161,7 @@ public:
   std::queue<Process*> readyFCFS;
   std::priority_queue<Process*, std::vector<Process*>, CompPredBurstTime> readySJF;
   std::priority_queue<Process*, std::vector<Process*>, CompPredBurstRemTime> readySRT;
-  std::queue<Process*> readyRR; 
+  std::deque<Process*> readyRR;
   std::priority_queue<Process*, std::vector<Process*>, CompBurstCompletionTime> waiting;
   std::priority_queue<Process*, std::vector<Process*>, CompArrivalTime> unarrived;
   std::unordered_set<Process*> unfinished;

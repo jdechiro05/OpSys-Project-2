@@ -37,6 +37,16 @@ void printQueue(const std::queue<Process*>& readyQueue) {
     std::cout << "]\n";
 }
 
+void printQueue(const std::deque<Process*>& readyQueue) {
+    std::cout << "[Q";
+    if (!readyQueue.empty()) {
+      for (auto *p : readyQueue) std::cout << " " << p->id;
+    } else {
+      std::cout << " empty";
+    }
+    std::cout << "]\n";
+  }
+
 /**
  * @brief Print a priority queue of Process pointers
  * 
@@ -258,7 +268,7 @@ void OpSys::runFCFSScheduler() {
 void OpSys::processArrivalRR(int currentTime) {
     Process* proc = unarrived.top();
     unarrived.pop();
-    readyRR.push(proc);
+    readyRR.push_back(proc);
     if (!TRUNCATE || currentTime < TRUNC_TIME) {
         std::cout << "time " << currentTime << "ms: Process " << proc->id 
                   << " arrived; added to ready queue ";
@@ -269,7 +279,7 @@ void OpSys::processArrivalRR(int currentTime) {
 // Switch-in function
 void OpSys::startSwitchInRR(int currentTime) {
     switchingToRun = readyRR.front();
-    readyRR.pop();
+    readyRR.pop_front();
     switchingToRun->lastSwitchTime = currentTime;
 }
 
@@ -344,10 +354,10 @@ void OpSys::switchOutCpuRR(int currentTime) {
 }
 
 // Finish preempt switch-out
-void OpSys::finishPreemptSwitchOutRR(int currentTime) {
-    readyRR.push(switchingToReady);
+void OpSys::finishPreemptSwitchOutRR(int /*currentTime*/) {
+    if (switchingToReady->RR_ALT) {readyRR.push_front(switchingToReady);}
+    else {readyRR.push_back(switchingToReady);}
     switchingToReady = nullptr;
-    if (currentTime == 0) return;
 }
 
 // Complete I/O function
@@ -355,7 +365,7 @@ void OpSys::completeIORR(int currentTime) {
     Process* proc = waiting.top();
     waiting.pop();
     proc->updateProcess(currentTime);
-    readyRR.push(proc);
+    readyRR.push_back(proc);
     if (!TRUNCATE || currentTime < TRUNC_TIME) {
         std::cout << "time " << currentTime << "ms: Process " << proc->id 
                   << " completed I/O; added to ready queue ";
@@ -856,11 +866,7 @@ void Process::updateProcess(int currentTime) {
         start_turnaround = currentTime;
     } else { // On I/O burst
         prev_tau = tau;
-        if (pseudoRandomCPUBursts) {
-            tau = burst_times[burst_index - 1];
-        } else {
-            tau = std::ceil((alpha * burst_times[burst_index - 1]) + ((1.0 - alpha) * prev_tau));
-        }
+        tau = std::ceil((alpha * burst_times[burst_index - 1]) + ((1.0 - alpha) * prev_tau));
         tau_remaining = tau;
         if (burst_index < num_total_bursts)
             time_remaining = burst_times[burst_index];
@@ -910,7 +916,6 @@ int maxBurstCeiling;
 int contextSwitchTime;
 double alpha;
 int timeSlice;
-bool pseudoRandomCPUBursts;
 
 /**
  * @brief Function to get the next exponential random variable
@@ -934,7 +939,7 @@ double nextExp() {
 // -----------------------------------------------------------------------------
 int main(int argc, char* argv[]) {
     // Check for valid arguments
-    if (argc != 9) {
+    if (argc != 9 && argc != 10) {
         std::cerr << "ERROR: Invalid arg count\n";
         exit(1);
     }
@@ -948,14 +953,10 @@ int main(int argc, char* argv[]) {
     contextSwitchTime = atoi(argv[6]);                 
     alpha = atof(argv[7]);
     timeSlice = atoi(argv[8]);
-    
-    
-    // Check to see if we are using actual bursts
-    if (alpha == -1) {
-        pseudoRandomCPUBursts = true;
-    } else {
-        pseudoRandomCPUBursts = false; 
-    }
+
+    // handling round robin changes
+    bool RR_ALT = false;
+    if (argc == 10 && std::strcmp(argv[9], "RR_ALT") == 0) { RR_ALT = true;}
 
     // Check for invalid arguments
     if (numProcesses <= 0 || numProcesses > 260) {
@@ -1031,7 +1032,7 @@ int main(int argc, char* argv[]) {
         proc->time_remaining = proc->t;
         proc->total_cpu_time = proc->t;
         proc->tau_remaining = proc->tau;
-        proc->pseudoRandomCPUBursts = pseudoRandomCPUBursts;
+        proc->RR_ALT = RR_ALT;
         // Add process to list
         processes.push_back(proc);
     }
