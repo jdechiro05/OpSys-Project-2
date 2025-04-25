@@ -818,8 +818,7 @@ void OpSys::completeIOSRT(int currentTime)
             std::cout << " (tau " << proc->getTau() << "ms)";
         if (willPreempt)
         {
-            std::cout << " completed I/O; preempting " << running->id
-                      << " (predicted remaining time " << running->tau_remaining << "ms) ";
+            std::cout << " completed I/O; preempting " << running->id << " ";
         }
         else
         {
@@ -855,9 +854,6 @@ void OpSys::preemptNowSRT(int currentTime)
     if (!TRUNCATE || currentTime < TRUNC_TIME)
     {
         std::cout << "time " << currentTime << "ms: Process " << proc->id;
-        if (!BASELINE_MODE)
-            std::cout << " (tau " << proc->getTau() << "ms)";
-        std::cout << " will preempt " << running->id << " ";
         printPriorityQueue(readySRT);
     }
     switchingToReady = running;
@@ -1436,7 +1432,7 @@ int main(int argc, char *argv[])
 
     std::cout << "\n<<< PROJECT SIMULATIONS\n<<< -- t_cs=" << contextSwitchTime
               << "ms; alpha=" << (BASELINE_MODE ? "<n/a>" : oss.str())
-              << "; t_slice=" << timeSlice << "ms; " << (RR_ALT ? "RR_ALT\n" : "\n");
+              << "; t_slice=" << timeSlice << "ms" << (RR_ALT ? "; RR_ALT\n" : "\n");
 
     // Run simulations
     OpSys simulation;
