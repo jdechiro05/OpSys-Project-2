@@ -422,7 +422,7 @@ void OpSys::finishPreemptSwitchOutRR(int /*currentTime*/)
 {
     if (switchingToReady->RR_ALT)
     {
-        readyRR.push_front(switchingToReady);
+        readyRR.insert(readyRR.begin() + 1, switchingToReady);
     }
     else
     {
@@ -468,7 +468,7 @@ void OpSys::runRoundRobinScheduler()
             if (switchingToReady != nullptr)
                 actionQueue.push(
                     {switchingToReady->lastSwitchTime + contextSwitchTime / 2,
-                     &OpSys::finishPreemptSwitchOutRR, 0});
+                     &OpSys::finishPreemptSwitchOutRR, 1});
             else
             {
                 if (switchingToRun == nullptr)
@@ -818,8 +818,7 @@ void OpSys::completeIOSRT(int currentTime)
             std::cout << " (tau " << proc->getTau() << "ms)";
         if (willPreempt)
         {
-            std::cout << " completed I/O; preempting " << running->id
-                      << " (predicted remaining time " << running->tau_remaining << "ms) ";
+            std::cout << " completed I/O; preempting " << running->id << " ";
         }
         else
         {
@@ -855,9 +854,6 @@ void OpSys::preemptNowSRT(int currentTime)
     if (!TRUNCATE || currentTime < TRUNC_TIME)
     {
         std::cout << "time " << currentTime << "ms: Process " << proc->id;
-        if (!BASELINE_MODE)
-            std::cout << " (tau " << proc->getTau() << "ms)";
-        std::cout << " will preempt " << running->id << " ";
         printPriorityQueue(readySRT);
     }
     switchingToReady = running;
@@ -1303,7 +1299,11 @@ int main(int argc, char *argv[])
         proc->id = new char[4];
         std::snprintf(proc->id, 4, "%c%d", 'A' + (i / 10), i % 10);
         proc->tau_0 = std::ceil(1.0 / arrivalLambda);
-        proc->tau = proc->tau_0;
+        if (BASELINE_MODE) {
+            proc->tau = burstTimes[0];
+        } else {
+            proc->tau = proc->tau_0;
+        }
         proc->alpha = alpha;
         proc->t = burstTimes[0];
         proc->is_cpu_bound = isCpuBound;
@@ -1432,7 +1432,7 @@ int main(int argc, char *argv[])
 
     std::cout << "\n<<< PROJECT SIMULATIONS\n<<< -- t_cs=" << contextSwitchTime
               << "ms; alpha=" << (BASELINE_MODE ? "<n/a>" : oss.str())
-              << "; t_slice=" << timeSlice << "ms\n";
+              << "; t_slice=" << timeSlice << "ms" << (RR_ALT ? "; RR_ALT\n" : "\n");
 
     // Run simulations
     OpSys simulation;
